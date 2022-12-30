@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: default
+spec:
+  clusterIP: 10.244.23.184
+  clusterIPs:
+  - 10.244.23.184
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - port: 5432
+    protocol: TCP
+    nodePort: 32222
+  selector:
+    app: postgres
+  sessionAffinity: None
+  type: LoadBalancer
+status:
+  loadBalancer: 
+    ingress:
+    - ip: 192.168.7.126
+
