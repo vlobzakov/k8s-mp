@@ -1,0 +1,53 @@
+type: update
+permanent: true
+baseUrl: https://raw.githubusercontent.com/vlobzakov/k8s-mp
+name: PostgreSQL Database
+description: Deploy PostgreSQL Database and expose it out of K8s Cluster
+logo: https://github.com/jelastic-jps/postgres/blob/master/images/postgres-70x70.png
+targetNodes: any
+onInstall:
+  cmd[${nodes.k8sm.master.id}]: kubectl apply -f https://raw.githubusercontent.com/vlobzakov/k8s-mp/main/postgres/postgres-svc-ext-ip.yaml
+
+settings:
+    fields:
+        - type: displayfield
+          caption: Useful info
+          hideLabel: true
+          markup: Access and manage the cluster remotely via API
+        - type: checkbox
+          name: api
+          caption: Remote API access is enabled
+        - type: string
+          name: ingress-controller
+          inputType: hidden
+
+    buttons:
+      - caption: Remote API
+        settings: main
+        action: addon-remote-api
+        loadingText: Updating...
+        confirmText: Are you sure?
+        successText: Remote API Access was successfully updated!
+      - caption: Storage
+        action: addon-conf-storage
+        confirmText: Cluster Storage will be added if missing. Continue?
+        successText: Cluster storage has been succesfully installed!
+      - caption: Jaeger
+        action: addon-jaeger
+        confirmText: Jaeger will be installed if missing. Continue?
+
+    actions:
+      addon-remote-api:
+      - log: '${this.api}'
+      - init-globals-ingress
+      - setup-remote-api: ${this.api}
+      - if (${this.api:true}):
+          - set:
+              apiStatusMessage: enabled at ${env.url}api
+      - else:
+          - set:
+              apiStatusMessage: disabled
+      - message.email.send:
+          to: "${user.email}"
+          subject: Remote API Access Successfully Updated in ${env.name}
+          body: Remote API has been ${this.apiStatusMessage}
