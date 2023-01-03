@@ -2,15 +2,29 @@ id: pgaddon
 type: update
 baseUrl: https://raw.githubusercontent.com/vlobzakov/k8s-mp/master
 name: PostgreSQL Database
-description: Deploy PostgreSQL Database and expose it out of K8s Cluster
+description: Deploy PostgreSQL Database and use it for applications inside Kubernetes Cluster or expose it to the applications outside of K8s or even VAP
 logo: https://github.com/jelastic-jps/postgres/blob/master/images/postgres-70x70.png
 targetNodes: kubernetes
 onInstall: 
+#####Secret setup########
+  - cmd[${nodes.k8sm.master.id}]: wget https://raw.githubusercontent.com/vlobzakov/k8s-mp/main/postgres/postgres-secret.yaml
+  - cmd[${nodes.k8sm.master.id}]: sed -i s/name:\ postgres/name:\ ${settings.deployName}/ postgres-secret.yaml
+  - cmd[${nodes.k8sm.master.id}]: sed -i s/POSTGRES_USER:\ cG9zdGdyZXM=/POSTGRES_USER:\ ${settings.db_user.toBase64()}/ postgres-secret.yaml
+  - cmd[${nodes.k8sm.master.id}]: sed -i s/POSTGRES_PASSWORD:\ cG9zdGdyZXM=/POSTGRES_PASSWORD:\ ${settings.db_pwd.toBase64()}/ postgres-secret.yaml
+  - cmd[${nodes.k8sm.master.id}]: kubectl apply -f postgres-secret.yaml
+####Deploy setup#########
+  - cmd[${nodes.k8sm.master.id}]: wget https://raw.githubusercontent.com/vlobzakov/k8s-mp/main/postgres/postgres-deploy.yaml
+  - cmd[${nodes.k8sm.master.id}]: sed -i s/name:\ postgres/name:\ ${settings.deployName}/ postgres-deploy.yaml
+  - cmd[${nodes.k8sm.master.id}]: sed -i s/app:\ postgres/app:\ ${settings.deployName}/ postgres-deploy.yaml
+  - cmd[${nodes.k8sm.master.id}]: kubectl apply -f postgres-deploy.yaml  
+####Service setup########
   - cmd[${nodes.k8sm.master.id}]: wget https://raw.githubusercontent.com/vlobzakov/k8s-mp/main/postgres/postgres-svc-ext-ip.yaml
-#  - cmd[${nodes.k8sm.master.id}]: wget https://raw.githubusercontent.com/vlobzakov/k8s-mp/main/postgres/postgres-deploy.yaml
-#  - cmd[${nodes.k8sm.master.id}]: wget https://raw.githubusercontent.com/vlobzakov/k8s-mp/main/postgres/postgres-secret.yaml
-#  - cmd[${nodes.k8sm.master.id}]: sed -i s/POSTGRES_USER:\ cG9zdGdyZXM=/POSTGRES_USER:\ ${settings.db_user.toBase64()}/ postgres-secret.yaml
-#  - cmd[${nodes.k8sm.master.id}]: sed -i s/POSTGRES_PASSWORD:\ cG9zdGdyZXM=/POSTGRES_PASSWORD:\ ${settings.db_pwd.toBase64()}/ postgres-secret.yaml
+  - cmd[${nodes.k8sm.master.id}]: sed -i s/name:\ postgres/name:\ ${settings.deployName}/ postgres-svc-ext-ip.yaml
+  - cmd[${nodes.k8sm.master.id}]: sed -i s/app:\ postgres/app:\ ${settings.deployName}/ postgres-svc-ext-ip.yaml
+  - cmd[${nodes.k8sm.master.id}]: kubectl apply -f postgres-svc-ext-ip.yaml
+
+globals:
+  servicePort: 32222
 
 settings:
     fields:
@@ -28,46 +42,55 @@ settings:
         - type: string
           name: deployName
           caption: Deployment Name
-        - type: string
-          name: svcName
-          caption: Service Name
-        - type: checkbox
-          name: extIP
-          caption: Remote DB access via Ext IP
-        - type: checkbox
-          name: endpoint
-          caption: Remote DB access via Endpoint
-
 
 buttons:
   - caption: Postgres K8s IP
     action: getsvcIP
-    successText: /postgres/text/getsvcip.md
   - caption: Postgres VAP IP
     action: getmasterIP
-    successText:  /postgres/text/getmasterip.md
   - caption: Set EndPoint
     action: setEndPoint
-    successText:  /postgres/text/setendpoint.md
+#  - caption: Set Ext IP
+#    action: setExtIP
 
 actions:
+#  setExtIP:
+#    setExtIpEnabled:
+#      - enabled: true
+#        nodeGroup: cp
   getsvcIP:
-     - cmd[${nodes.k8sm.master.id}]: kubectl get -o template service/postgres --template='{{.spec.clusterIP}}' 
+     - cmd[${nodes.k8sm.master.id}]: kubectl get -o template service/${settings.deployName} --template='{{.spec.clusterIP}}' 
      - setGlobals:
-        intIPmsg: You may access PostgreSQL service by K8s internal IP ${response.out}
+        intIPmsg: You may access K8s PostgreSQL service within Kuberentes Cluster by K8s internal pod's IP ${response.out} with credentials username=${settings.db_user} and password=${settings.db_pwd}
      - message.email.send:
           to: "${user.email}"
-          subject: PostgreSQL Access whithin K8s Cluster
+          subject: K8s PostgreSQL service access whithin Kubernetes Cluster
           body: ${globals.intIPmsg}
+     - return: 
+         type: info
+         message: ${globals.intIPmsg}
   getmasterIP:
      - setGlobals:
-        vapIPmsg: You may access PostgreSQL service by VAP internal IP ${nodes.k8sm.master.intIP}]
+        vapIPmsg: You may access K8s PostgreSQL service within Virtuozzo Application Platform by Control Plane private IP ${nodes.k8sm.master.intIP}:${globals.servicePort} with credentials username=${settings.db_user} and password=${settings.db_pwd}
+     - message.email.send:
+          to: "${user.email}"
+          subject: K8s PostgreSQL service access whithin Virtuozzo Appplication Platform
+          body: ${globals.vapIPmsg}
+     - return: 
+         type: info
+         message: ${globals.vapIPmsg}
   setEndPoint:
      - api : env.control.AddEndpoint
        nodeId: ${nodes.k8sm.master.id}
-       privatePort: 32222
+       privatePort: ${globals.servicePort}
        protocol: TCP
        name: svcPort
      - setGlobals:  
-         EndPointmsg: Now your PostgreSQL service is publicly accessible via SLB by **node${nodes.k8sm.master.id}-${env.domain}:${response.object.publicPort}**     
-
+         EndPointmsg: Now your K8s PostgreSQL service is publicly accessible via VAP Shared Load Balancer by node${nodes.k8sm.master.id}-${env.domain}:${response.object.publicPort} with credentials username=${settings.db_user} and password=${settings.db_pwd}
+     - message.email.send:
+          to: "${user.email}"
+          subject: K8s PostgreSQL service access outside Virtuozzo Application Platform
+          body: ${globals.EndPointmsg}
+     - return: 
+         type: info
+         message: ${globals.EndPointmsg}
