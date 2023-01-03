@@ -12,16 +12,19 @@ onInstall:
   - cmd[${nodes.k8sm.master.id}]: sed -i s/POSTGRES_USER:\ cG9zdGdyZXM=/POSTGRES_USER:\ ${settings.db_user.toBase64()}/ postgres-secret.yaml
   - cmd[${nodes.k8sm.master.id}]: sed -i s/POSTGRES_PASSWORD:\ cG9zdGdyZXM=/POSTGRES_PASSWORD:\ ${settings.db_pwd.toBase64()}/ postgres-secret.yaml
   - cmd[${nodes.k8sm.master.id}]: kubectl apply -f postgres-secret.yaml
+  - cmd[${nodes.k8sm.master.id}]: rm -f postgres-secret.yaml
 ####Deploy setup#########
   - cmd[${nodes.k8sm.master.id}]: wget https://raw.githubusercontent.com/vlobzakov/k8s-mp/main/postgres/postgres-deploy.yaml
   - cmd[${nodes.k8sm.master.id}]: sed -i s/name:\ postgres/name:\ ${settings.deployName}/ postgres-deploy.yaml
   - cmd[${nodes.k8sm.master.id}]: sed -i s/app:\ postgres/app:\ ${settings.deployName}/ postgres-deploy.yaml
-  - cmd[${nodes.k8sm.master.id}]: kubectl apply -f postgres-deploy.yaml  
+  - cmd[${nodes.k8sm.master.id}]: kubectl apply -f postgres-deploy.yaml
+  - cmd[${nodes.k8sm.master.id}]: rm -f postgres-deploy.yaml
 ####Service setup########
   - cmd[${nodes.k8sm.master.id}]: wget https://raw.githubusercontent.com/vlobzakov/k8s-mp/main/postgres/postgres-svc-ext-ip.yaml
   - cmd[${nodes.k8sm.master.id}]: sed -i s/name:\ postgres/name:\ ${settings.deployName}/ postgres-svc-ext-ip.yaml
   - cmd[${nodes.k8sm.master.id}]: sed -i s/app:\ postgres/app:\ ${settings.deployName}/ postgres-svc-ext-ip.yaml
   - cmd[${nodes.k8sm.master.id}]: kubectl apply -f postgres-svc-ext-ip.yaml
+  - cmd[${nodes.k8sm.master.id}]: rm -f postgres-svc-ext-ip.yaml
 
 globals:
   servicePort: 32222
@@ -31,7 +34,7 @@ settings:
         - type: displayfield
           caption: Useful info
           hideLabel: true
-          markup: Provide info to access the cluster
+          markup: Set up credentials to access the Database and specify the Deployment Name
         - type: string
           name: db_user
           caption: DB username
