@@ -3,7 +3,7 @@ type: update
 baseUrl: https://raw.githubusercontent.com/vlobzakov/k8s-mp/master
 name: PostgreSQL Database in Kubernetes
 description: Deploy PostgreSQL Database and use it for applications inside Kubernetes Cluster or expose it to the applications outside of K8s or even VAP
-logo: https://github.com/jelastic-jps/postgres/blob/master/images/postgres-70x70.png
+logo: https://github.com/vlobzakov/k8s-mp/blob/main/postgres/images/postgres-70x70.png
 targetNodes: kubernetes
 onInstall: 
 #####Secret setup########
