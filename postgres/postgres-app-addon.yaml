@@ -6,6 +6,14 @@ description: Deploy PostgreSQL Database and use it for applications inside Kuber
 logo: https://github.com/vlobzakov/k8s-mp/blob/main/postgres/images/postgres-70x70.png
 targetNodes: kubernetes
 onInstall: 
+#####Persistent volume setup########
+  - cmd[${nodes.k8sm.master.id}]: wget https://raw.githubusercontent.com/vlobzakov/k8s-mp/main/postgres/db-persistent-volume.yaml
+  - cmd[${nodes.k8sm.master.id}]: kubectl apply -f db-persistent-volume.yaml
+  - cmd[${nodes.k8sm.master.id}]: rm -f db-persistent-volume.yaml
+#####Persistent volume clain########
+  - cmd[${nodes.k8sm.master.id}]: wget https://raw.githubusercontent.com/vlobzakov/k8s-mp/main/postgres/db-volume-claim.yaml
+  - cmd[${nodes.k8sm.master.id}]: kubectl apply -f db-volume-claim.yaml
+  - cmd[${nodes.k8sm.master.id}]: rm -f db-volume-claim.yaml
 #####Secret setup########
   - cmd[${nodes.k8sm.master.id}]: wget https://raw.githubusercontent.com/vlobzakov/k8s-mp/main/postgres/postgres-secret.yaml
   - cmd[${nodes.k8sm.master.id}]: sed -i s/name:\ postgres/name:\ ${settings.deployName}/ postgres-secret.yaml
