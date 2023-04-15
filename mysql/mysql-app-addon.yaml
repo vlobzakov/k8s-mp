@@ -8,31 +8,31 @@ targetNodes: kubernetes
 onInstall: 
 #####Persistent volume setup########
   - cmd[${nodes.k8sm.master.id}]: wget https://raw.githubusercontent.com/vlobzakov/k8s-mp/main/mysql/db-persistent-volume.yaml
-#  - cmd[${nodes.k8sm.master.id}]: kubectl apply -f db-persistent-volume.yaml
-#  - cmd[${nodes.k8sm.master.id}]: rm -f db-persistent-volume.yaml
+  - cmd[${nodes.k8sm.master.id}]: kubectl apply -f db-persistent-volume.yaml
+  - cmd[${nodes.k8sm.master.id}]: rm -f db-persistent-volume.yaml
 #####Persistent volume claim########
   - cmd[${nodes.k8sm.master.id}]: wget https://raw.githubusercontent.com/vlobzakov/k8s-mp/main/mysql/db-volume-claim.yaml
-#  - cmd[${nodes.k8sm.master.id}]: kubectl apply -f db-volume-claim.yaml
-#  - cmd[${nodes.k8sm.master.id}]: rm -f db-volume-claim.yaml
+  - cmd[${nodes.k8sm.master.id}]: kubectl apply -f db-volume-claim.yaml
+  - cmd[${nodes.k8sm.master.id}]: rm -f db-volume-claim.yaml
 #####Secret setup########
   - cmd[${nodes.k8sm.master.id}]: wget https://raw.githubusercontent.com/vlobzakov/k8s-mp/main/mysql/mysql-secret.yaml
   - cmd[${nodes.k8sm.master.id}]: sed -i s/name:\ mysql/name:\ ${settings.deployName}/ mysql-secret.yaml
   - cmd[${nodes.k8sm.master.id}]: sed -i s/MySQL_USER:\ cG9zdGdyZXM=/MySQL_USER:\ ${settings.db_user.toBase64()}/ mysql-secret.yaml
   - cmd[${nodes.k8sm.master.id}]: sed -i s/MySQL_PASSWORD:\ cG9zdGdyZXM=/MySQL_PASSWORD:\ ${settings.db_pwd.toBase64()}/ mysql-secret.yaml
-#  - cmd[${nodes.k8sm.master.id}]: kubectl apply -f mysql-secret.yaml
-#  - cmd[${nodes.k8sm.master.id}]: rm -f mysql-secret.yaml
+  - cmd[${nodes.k8sm.master.id}]: kubectl apply -f mysql-secret.yaml
+  - cmd[${nodes.k8sm.master.id}]: rm -f mysql-secret.yaml
 ####Deploy setup#########
   - cmd[${nodes.k8sm.master.id}]: wget https://raw.githubusercontent.com/vlobzakov/k8s-mp/main/mysql/mysql-deploy.yaml
   - cmd[${nodes.k8sm.master.id}]: sed -i s/name:\ mysql/name:\ ${settings.deployName}/ mysql-deploy.yaml
   - cmd[${nodes.k8sm.master.id}]: sed -i s/app:\ mysql/app:\ ${settings.deployName}/ mysql-deploy.yaml
-#  - cmd[${nodes.k8sm.master.id}]: kubectl apply -f mysql-deploy.yaml
-#  - cmd[${nodes.k8sm.master.id}]: rm -f mysql-deploy.yaml
+  - cmd[${nodes.k8sm.master.id}]: kubectl apply -f mysql-deploy.yaml
+  - cmd[${nodes.k8sm.master.id}]: rm -f mysql-deploy.yaml
 ####Service setup########
   - cmd[${nodes.k8sm.master.id}]: wget https://raw.githubusercontent.com/vlobzakov/k8s-mp/main/mysql/mysql-svc-ext-ip.yaml
   - cmd[${nodes.k8sm.master.id}]: sed -i s/name:\ mysql/name:\ ${settings.deployName}/ mysql-svc-ext-ip.yaml
   - cmd[${nodes.k8sm.master.id}]: sed -i s/app:\ mysql/app:\ ${settings.deployName}/ mysql-svc-ext-ip.yaml
-#  - cmd[${nodes.k8sm.master.id}]: kubectl apply -f mysql-svc-ext-ip.yaml
-#  - cmd[${nodes.k8sm.master.id}]: rm -f mysql-svc-ext-ip.yaml
+  - cmd[${nodes.k8sm.master.id}]: kubectl apply -f mysql-svc-ext-ip.yaml
+  - cmd[${nodes.k8sm.master.id}]: rm -f mysql-svc-ext-ip.yaml
 
 globals:
   servicePort: 32060
