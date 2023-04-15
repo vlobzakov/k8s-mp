@@ -35,7 +35,7 @@ onInstall:
   - cmd[${nodes.k8sm.master.id}]: rm -f mysql-svc-ext-ip.yaml
 
 globals:
-  servicePort: 33060
+  servicePort: 32060
 
 settings:
     fields:
