@@ -14,7 +14,7 @@ spec:
   ports:
   - port: 3306
     protocol: TCP
-    nodePort: 33060
+    nodePort: 32060
   selector:
     app: mysql
   sessionAffinity: None
