@@ -3,7 +3,7 @@ type: update
 baseUrl: https://raw.githubusercontent.com/vlobzakov/k8s-mp/master
 name: MySQL Database in Kubernetes
 description: Deploy MySQL Database and use it for applications inside Kubernetes Cluster or expose it to the applications outside of K8s or even VAP
-logo: https://raw.githubusercontent.com/jelastic-jps/mysql-cluster/master/images/70.png
+logo: https://raw.githubusercontent.com/vlobzakov/k8s-mp/main/mysql/images/mysql-70.png
 targetNodes: kubernetes
 onInstall: 
 #####Persistent volume setup########
