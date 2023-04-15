@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mysql-master
+  name: mysql
   namespace: default
 spec:
   progressDeadlineSeconds: 600
@@ -9,11 +9,11 @@ spec:
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      app: mysql-master
+      app: mysql
   template:
     metadata:
       labels:
-        app: mysql-master
+        app: mysql
     spec:
       containers:
       - env:
@@ -31,7 +31,7 @@ spec:
           value: /var/lib/mysql
         image: mysql
         imagePullPolicy: Always
-        name: mysql-master
+        name: mysql
         ports:
         - containerPort: 3306
           name: mysql-master
