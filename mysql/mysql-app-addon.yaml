@@ -17,8 +17,9 @@ onInstall:
 #####Secret setup########
   - cmd[${nodes.k8sm.master.id}]: wget https://raw.githubusercontent.com/vlobzakov/k8s-mp/main/mysql/mysql-secret.yaml
   - cmd[${nodes.k8sm.master.id}]: sed -i s/name:\ mysql/name:\ ${settings.deployName}/ mysql-secret.yaml
-  - cmd[${nodes.k8sm.master.id}]: sed -i s/MySQL_USER:\ cG9zdGdyZXM=/MySQL_USER:\ ${settings.db_user.toBase64()}/ mysql-secret.yaml
-  - cmd[${nodes.k8sm.master.id}]: sed -i s/MySQL_PASSWORD:\ cG9zdGdyZXM=/MySQL_PASSWORD:\ ${settings.db_pwd.toBase64()}/ mysql-secret.yaml
+  - cmd[${nodes.k8sm.master.id}]: sed -i s/MySQL_USER:\ bXlzcWx1c2Vy/MySQL_USER:\ ${settings.db_user.toBase64()}/ mysql-secret.yaml
+  - cmd[${nodes.k8sm.master.id}]: sed -i s/MySQL_PASSWORD:\ bXlzcWxwYXNzd29yZA==/MySQL_PASSWORD:\ ${settings.db_pwd.toBase64()}/ mysql-secret.yaml
+  - cmd[${nodes.k8sm.master.id}]: sed -i s/MySQL_ROOT_PASSWORD:\ bXlzcWxwYXNzd29yZA==/MySQL_ROOT_PASSWORD:\ ${settings.db_root_pwd.toBase64()}/ mysql-secret.yaml
   - cmd[${nodes.k8sm.master.id}]: kubectl apply -f mysql-secret.yaml
   - cmd[${nodes.k8sm.master.id}]: rm -f mysql-secret.yaml
 ####Deploy setup#########
@@ -49,6 +50,10 @@ settings:
         - type: string
           name: db_pwd
           caption: DB password
+          inputType: password
+        - type: string
+          name: db_root_pwd
+          caption: DB ROOT password
           inputType: password
         - type: string
           name: deployName
