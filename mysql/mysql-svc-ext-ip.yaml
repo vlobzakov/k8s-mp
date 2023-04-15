@@ -14,7 +14,7 @@ spec:
     protocol: TCP
     nodePort: 32060
   selector:
-    app: mysql-master
+    app: mysql
   sessionAffinity: None
   type: LoadBalancer
 status:
