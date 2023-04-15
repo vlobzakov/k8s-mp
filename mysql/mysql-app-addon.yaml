@@ -1,0 +1,107 @@
+id: mysqladdon
+type: update
+baseUrl: https://raw.githubusercontent.com/vlobzakov/k8s-mp/master
+name: MySQL Database in Kubernetes
+description: Deploy MySQL Database and use it for applications inside Kubernetes Cluster or expose it to the applications outside of K8s or even VAP
+logo: https://github.com/vlobzakov/k8s-mp/blob/main/postgres/images/postgres-70x70.png
+targetNodes: kubernetes
+onInstall: 
+#####Persistent volume setup########
+  - cmd[${nodes.k8sm.master.id}]: wget https://raw.githubusercontent.com/vlobzakov/k8s-mp/main/mysql/db-persistent-volume.yaml
+  - cmd[${nodes.k8sm.master.id}]: kubectl apply -f db-persistent-volume.yaml
+  - cmd[${nodes.k8sm.master.id}]: rm -f db-persistent-volume.yaml
+#####Persistent volume claim########
+  - cmd[${nodes.k8sm.master.id}]: wget https://raw.githubusercontent.com/vlobzakov/k8s-mp/main/mysql/db-volume-claim.yaml
+  - cmd[${nodes.k8sm.master.id}]: kubectl apply -f db-volume-claim.yaml
+  - cmd[${nodes.k8sm.master.id}]: rm -f db-volume-claim.yaml
+#####Secret setup########
+  - cmd[${nodes.k8sm.master.id}]: wget https://raw.githubusercontent.com/vlobzakov/k8s-mp/main/mysql/mysql-secret.yaml
+  - cmd[${nodes.k8sm.master.id}]: sed -i s/name:\ mysql/name:\ ${settings.deployName}/ mysql-secret.yaml
+  - cmd[${nodes.k8sm.master.id}]: sed -i s/MySQL_USER:\ cG9zdGdyZXM=/MySQL_USER:\ ${settings.db_user.toBase64()}/ mysql-secret.yaml
+  - cmd[${nodes.k8sm.master.id}]: sed -i s/MySQL_PASSWORD:\ cG9zdGdyZXM=/MySQL_PASSWORD:\ ${settings.db_pwd.toBase64()}/ mysql-secret.yaml
+  - cmd[${nodes.k8sm.master.id}]: kubectl apply -f mysql-secret.yaml
+  - cmd[${nodes.k8sm.master.id}]: rm -f mysql-secret.yaml
+####Deploy setup#########
+  - cmd[${nodes.k8sm.master.id}]: wget https://raw.githubusercontent.com/vlobzakov/k8s-mp/main/mysql/mysql-deploy.yaml
+  - cmd[${nodes.k8sm.master.id}]: sed -i s/name:\ mysql/name:\ ${settings.deployName}/ mysql-deploy.yaml
+  - cmd[${nodes.k8sm.master.id}]: sed -i s/app:\ mysql/app:\ ${settings.deployName}/ mysql-deploy.yaml
+  - cmd[${nodes.k8sm.master.id}]: kubectl apply -f mysql-deploy.yaml
+  - cmd[${nodes.k8sm.master.id}]: rm -f mysql-deploy.yaml
+####Service setup########
+  - cmd[${nodes.k8sm.master.id}]: wget https://raw.githubusercontent.com/vlobzakov/k8s-mp/main/mysql/mysql-svc-ext-ip.yaml
+  - cmd[${nodes.k8sm.master.id}]: sed -i s/name:\ mysql/name:\ ${settings.deployName}/ mysql-svc-ext-ip.yaml
+  - cmd[${nodes.k8sm.master.id}]: sed -i s/app:\ mysql/app:\ ${settings.deployName}/ mysql-svc-ext-ip.yaml
+  - cmd[${nodes.k8sm.master.id}]: kubectl apply -f mysql-svc-ext-ip.yaml
+  - cmd[${nodes.k8sm.master.id}]: rm -f mysql-svc-ext-ip.yaml
+
+globals:
+  servicePort: 33060
+
+settings:
+    fields:
+        - type: displayfield
+          caption: Useful info
+          hideLabel: true
+          markup: Set up credentials to access the Database and specify the Deployment Name
+        - type: string
+          name: db_user
+          caption: DB username
+        - type: string
+          name: db_pwd
+          caption: DB password
+          inputType: password
+        - type: string
+          name: deployName
+          caption: Deployment Name
+
+buttons:
+  - caption: MySQL K8s IP
+    action: getsvcIP
+  - caption: MySQL VAP IP
+    action: getmasterIP
+  - caption: Set EndPoint
+    action: setEndPoint
+#  - caption: Set Ext IP
+#    action: setExtIP
+
+actions:
+#  setExtIP:
+#    setExtIpEnabled:
+#      - enabled: true
+#        nodeGroup: cp
+  getsvcIP:
+     - cmd[${nodes.k8sm.master.id}]: kubectl get -o template service/${settings.deployName} --template='{{.spec.clusterIP}}' 
+     - setGlobals:
+        intIPmsg: You may access K8s MySQL service within Kuberentes Cluster by K8s internal pod's IP ${response.out} with credentials username=${settings.db_user} and password=${settings.db_pwd}
+     - message.email.send:
+          to: "${user.email}"
+          subject: K8s MySQL service access whithin Kubernetes Cluster
+          body: ${globals.intIPmsg}
+     - return: 
+         type: info
+         message: ${globals.intIPmsg}
+  getmasterIP:
+     - setGlobals:
+        vapIPmsg: You may access K8s MySQL service within Virtuozzo Application Platform by Control Plane private IP ${nodes.k8sm.master.intIP}:${globals.servicePort} with credentials username=${settings.db_user} and password=${settings.db_pwd}
+     - message.email.send:
+          to: "${user.email}"
+          subject: K8s MySQL service access whithin Virtuozzo Appplication Platform
+          body: ${globals.vapIPmsg}
+     - return: 
+         type: info
+         message: ${globals.vapIPmsg}
+  setEndPoint:
+     - api : env.control.AddEndpoint
+       nodeId: ${nodes.k8sm.master.id}
+       privatePort: ${globals.servicePort}
+       protocol: TCP
+       name: svcPort
+     - setGlobals:  
+         EndPointmsg: Now your K8s MySQL service is publicly accessible via VAP Shared Load Balancer by node${nodes.k8sm.master.id}-${env.domain}:${response.object.publicPort} with credentials username=${settings.db_user} and password=${settings.db_pwd}
+     - message.email.send:
+          to: "${user.email}"
+          subject: K8s MySQL service access outside Virtuozzo Application Platform
+          body: ${globals.EndPointmsg}
+     - return: 
+         type: info
+         message: ${globals.EndPointmsg}

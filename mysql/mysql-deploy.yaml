@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: default
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - env:
+        - name: MYSQL_USER
+          valueFrom: 
+            secretKeyRef:
+              name: mysql-secret
+              key: MYSQL_USER
+        - name: MYSQL_PASSWORD
+          valueFrom: 
+            secretKeyRef:
+              name: mysql-secret
+              key: MYSQL_PASSWORD
+        - name: MYSQLDATA
+          value: /var/lib/mysql
+        image: mysql
+        imagePullPolicy: Always
+        name: mysql
+        ports:
+        - containerPort: 5432
+          name: mysql
+        volumeMounts:
+        - name: mysqldata
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysqldata
+        persistentVolumeClaim:
+          claimName: mysqldb-persistent-volume-claim
+
