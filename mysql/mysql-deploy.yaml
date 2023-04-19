@@ -34,19 +34,17 @@ spec:
               key: MYSQL_ROOT_PASSWORD
         - name: MYSQLDATA
           value: /var/lib/mysql
-        - name: MYSQL_ROOT_HOST
-          value: '\%'
         image: mysql
         imagePullPolicy: Always
         name: mysql
         ports:
         - containerPort: 3306
           name: mysql
-        volumeMounts:
-        - name: mysqldata
-          mountPath: /var/lib/mysql
-      volumes:
-      - name: mysqldata
-        persistentVolumeClaim:
-          claimName: mysqldb-persistent-volume-claim
+#        volumeMounts:
+#        - name: mysqldata
+#          mountPath: /var/lib/mysql
+#      volumes:
+#      - name: mysqldata
+#        persistentVolumeClaim:
+#          claimName: mysqldb-persistent-volume-claim
 
