@@ -22,7 +22,7 @@ onInstall:
 #  - cmd[${nodes.k8sm.master.id}]: kubectl apply -f mysql-deploy.yaml
 #  - cmd[${nodes.k8sm.master.id}]: rm -f mysql-deploy.yaml
 ####Service setup########
-  - cmd[${nodes.k8sm.master.id}]: wget wget ${baseUrl}/mysql/mysql-svc-ext-ip.yaml
+  - cmd[${nodes.k8sm.master.id}]: wget ${baseUrl}/mysql/mysql-svc-ext-ip.yaml
   - cmd[${nodes.k8sm.master.id}]: sed -i s/name:\ mysql/name:\ ${settings.deployName}/ mysql-svc-ext-ip.yaml
   - cmd[${nodes.k8sm.master.id}]: sed -i s/app:\ mysql/app:\ ${settings.deployName}/ mysql-svc-ext-ip.yaml
 #  - cmd[${nodes.k8sm.master.id}]: kubectl apply -f mysql-svc-ext-ip.yaml
