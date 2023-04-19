@@ -63,7 +63,7 @@ actions:
   getsvcIP:
      - cmd[${nodes.k8sm.master.id}]: kubectl get -o template service/${settings.deployName} --template='{{.spec.clusterIP}}' 
      - setGlobals:
-        intIPmsg: You may access K8s MySQL service within Kuberentes Cluster by K8s internal pod's IP ${response.out} with credentials username=${settings.db_user} and password=${settings.db_pwd}
+        intIPmsg: You may access K8s MySQL service within Kuberentes Cluster by K8s internal pod's IP ${response.out} with <b>root</b> user password=${settings.db_root_pwd}
      - message.email.send:
           to: "${user.email}"
           subject: K8s MySQL service access whithin Kubernetes Cluster
@@ -73,7 +73,7 @@ actions:
          message: ${globals.intIPmsg}
   getmasterIP:
      - setGlobals:
-        vapIPmsg: You may access K8s MySQL service within Virtuozzo Application Platform by Control Plane private IP ${nodes.k8sm.master.intIP}:${globals.servicePort} with credentials username=${settings.db_user} and password=${settings.db_pwd}
+        vapIPmsg: You may access K8s MySQL service within Virtuozzo Application Platform by Control Plane private IP ${nodes.k8sm.master.intIP}:${globals.servicePort} with <b>root</b> user password=${settings.db_root_pwd}
      - message.email.send:
           to: "${user.email}"
           subject: K8s MySQL service access whithin Virtuozzo Appplication Platform
@@ -88,7 +88,7 @@ actions:
        protocol: TCP
        name: svcPort
      - setGlobals:  
-         EndPointmsg: Now your K8s MySQL service is publicly accessible via VAP Shared Load Balancer by node${nodes.k8sm.master.id}-${env.domain}:${response.object.publicPort} with credentials username=${settings.db_user} and password=${settings.db_pwd}
+         EndPointmsg: Now your K8s MySQL service is publicly accessible via VAP Shared Load Balancer by node${nodes.k8sm.master.id}-${env.domain}:${response.object.publicPort} with <b>root</b> user password=${settings.db_root_pwd}
      - message.email.send:
           to: "${user.email}"
           subject: K8s MySQL service access outside Virtuozzo Application Platform
