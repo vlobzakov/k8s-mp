@@ -94,12 +94,15 @@ actions:
      - cmd[${nodes.k8sm.master.id}]: kubectl get nodes -o wide | grep node | awk -F\  '{print $6}'
      - setGlobals:
          dbEndPoint: ${response.out}
+     - cmd[${nodes.k8sm.master.id}]:  kubectl describe svc postgres | grep NodePort | awk -F\  '{print $3}' | sed 's/\/TCP//'
+     - setGlobals:
+         dbPublicPort: ${response.out}
      - setGlobals:  
-         EndPointmsg: Now your K8s PostgreSQL service is publicly accessible via VAP Shared Load Balancer by node${nodes.k8sm.master.id}-${env.domain}:${response.object.publicPort} with credentials username=${settings.db_user} and password=${settings.db_pwd}
+         EndPointmsg: Now your K8s PostgreSQL service is publicly accessible at VHI K8s by ${globals.dbEndPoint}:${globals.dbPublicPort} with credentials username=${settings.db_user} and password=${settings.db_pwd}
      - message.email.send:
           to: "${user.email}"
           subject: VHI K8s PostgreSQL service access from outside
-          body: ${globals.dbEndPoint}:${globals.servicePort}
+          body: ${globals.dbEndPoint}:${globals.dbPublicPort}
      - return: 
          type: info
-         message: ${globals.dbEndPoint}:${globals.servicePort}
+         message: ${globals.dbEndPoint}:${globals.dbPublicPort}
