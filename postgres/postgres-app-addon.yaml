@@ -1,7 +1,7 @@
-id: pgaddon
+id: pgaddonvhi
 type: update
 baseUrl: https://raw.githubusercontent.com/vlobzakov/k8s-mp/chainstack
-name: PostgreSQL Database in Kubernetes
+name: PostgreSQL DB in VHI Kubernetes
 description: Deploy PostgreSQL Database and use it for applications inside **VHI** Kubernetes Cluster or expose it to the applications outside of **VHI** K8s
 logo: https://github.com/vlobzakov/k8s-mp/blob/main/postgres/images/postgres-70x70.png
 targetNodes: kubernetes
