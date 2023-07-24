@@ -102,7 +102,7 @@ actions:
      - message.email.send:
           to: "${user.email}"
           subject: VHI K8s PostgreSQL service access from outside
-          body: ${globals.dbEndPoint}:${globals.dbPublicPort}
+          body: ${globals.EndPointmsg} 
      - return: 
          type: info
-         message: ${globals.dbEndPoint}:${globals.dbPublicPort}
+         message: ${globals.EndPointmsg} 
